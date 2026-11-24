@@ -1,0 +1,39 @@
+relationship 0cecac5d-8f8c-4f19-9201-893711458d47
+	joinOnDateBehavior: datePartOnly
+	fromColumn: order_facts.purchase_ts
+	toColumn: LocalDateTable_37c8c353-0f1f-4a98-9b7e-ae480bd8a3b3.Date
+
+relationship a7f3a2b6-13b8-4226-93b9-7a5853abdaed
+	joinOnDateBehavior: datePartOnly
+	fromColumn: order_facts.carrier_ts
+	toColumn: LocalDateTable_0a6ea77d-4ca4-4ff0-9c10-33e8cd0f10ca.Date
+
+relationship 71e95e3f-0741-4693-a0b3-f8eddd032384
+	joinOnDateBehavior: datePartOnly
+	fromColumn: order_facts.delivered_ts
+	toColumn: LocalDateTable_1452a554-41ea-4488-a43e-e2c5b54c9bad.Date
+
+relationship e4e34e4d-d086-48cd-82f9-a1d1471306a9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: order_facts.estimated_ts
+	toColumn: LocalDateTable_5451f3f5-e76e-480a-bd9d-4b5f3d629490.Date
+
+relationship AutoDetected_7ee90a05-457a-47e2-8df5-216d17911f76
+	fromColumn: order_facts.delay_bucket
+	toColumn: delay_bucket_summary.delay_bucket
+
+relationship AutoDetected_c3433d02-bc06-4778-ac07-fdeea86bbe6c
+	fromColumn: order_facts.customer_state
+	toColumn: state_summary.customer_state
+
+relationship AutoDetected_ce664f9f-5b77-4bc7-b0dc-1f707e73a116
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: state_review_gap.customer_state
+	toColumn: state_summary.customer_state
+
+relationship 437861a7-f104-4c2c-89e2-5fc13594359c
+	joinOnDateBehavior: datePartOnly
+	fromColumn: monthly_trend.month
+	toColumn: LocalDateTable_e72c9c97-8ebc-4d88-a648-e62915e7a1ed.Date
+

@@ -1,0 +1,94 @@
+table delay_bucket_summary
+	lineageTag: 740517a1-0ac8-41b9-aa1e-95042cbd602d
+
+	column delay_bucket
+		dataType: string
+		lineageTag: ba11b7ae-b92f-4743-b9e8-afea1e9d641f
+		summarizeBy: none
+		sourceColumn: delay_bucket
+
+		annotation SummarizationSetBy = Automatic
+
+	column orders
+		dataType: int64
+		formatString: #,0
+		lineageTag: 18ec2c14-ec0a-4a42-bffe-72e5b01d8fb1
+		summarizeBy: none
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_review
+		dataType: double
+		formatString: 0.0
+		lineageTag: d74f273f-0015-4137-a380-8be70dd7bf88
+		summarizeBy: none
+		sourceColumn: avg_review
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_one_star
+		dataType: double
+		formatString: 0"%"
+		lineageTag: 8d4e16c2-e9e5-4d2e-9cdf-4a7fcae19684
+		summarizeBy: none
+		sourceColumn: pct_one_star
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_came_back
+		dataType: double
+		lineageTag: 960f8598-80a8-424c-83c6-9358d80bebef
+		summarizeBy: none
+		sourceColumn: pct_came_back
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_order_value
+		dataType: double
+		lineageTag: 21291e94-bb09-4f63-9a79-a3f2335599c5
+		summarizeBy: none
+		sourceColumn: avg_order_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_seller_days
+		dataType: double
+		lineageTag: d1763df8-4839-48ee-be34-7f742896a0b7
+		summarizeBy: none
+		sourceColumn: avg_seller_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_carrier_days
+		dataType: double
+		lineageTag: ac9879f8-423d-478a-9b11-84ca93c5578a
+		summarizeBy: none
+		sourceColumn: avg_carrier_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition delay_bucket_summary = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\Intel\olist_data\delay_bucket_summary.csv"),[Delimiter=",", Columns=8, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"delay_bucket", type text}, {"orders", Int64.Type}, {"avg_review", type number}, {"pct_one_star", type number}, {"pct_came_back", type number}, {"avg_order_value", type number}, {"avg_seller_days", type number}, {"avg_carrier_days", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

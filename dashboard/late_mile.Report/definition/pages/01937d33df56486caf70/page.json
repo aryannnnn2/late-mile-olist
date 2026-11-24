@@ -1,0 +1,8 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "01937d33df56486caf70",
+  "displayName": "Regional Investigation",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920
+}

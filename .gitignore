@@ -1,0 +1,8 @@
+.ipynb_checkpoints/
+__pycache__/
+*.pbix
+*.abf
+.pbi/
+data/raw/
+data/rebuilt/
+data/processed/order_facts.csv

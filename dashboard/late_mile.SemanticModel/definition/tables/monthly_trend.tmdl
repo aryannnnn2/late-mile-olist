@@ -1,0 +1,92 @@
+table monthly_trend
+	lineageTag: 19d01ff5-a579-4d8c-bfbd-04623288d216
+
+	column month
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: fd6938f8-5023-4e9a-8d10-94a47f96ecee
+		summarizeBy: none
+		sourceColumn: month
+
+		variation Variation
+			isDefault
+			relationship: 437861a7-f104-4c2c-89e2-5fc13594359c
+			defaultHierarchy: LocalDateTable_e72c9c97-8ebc-4d88-a648-e62915e7a1ed.'Date Hierarchy'
+
+		changedProperty = DataType
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column orders
+		dataType: int64
+		formatString: #,0
+		lineageTag: 2fd1bd69-e006-4185-be93-b995716e1df5
+		summarizeBy: sum
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column late_orders
+		dataType: int64
+		formatString: 0
+		lineageTag: ea97a247-bf76-4bb8-b29a-26e0834914de
+		summarizeBy: sum
+		sourceColumn: late_orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column late_pct
+		dataType: double
+		formatString: 0.0"%"
+		lineageTag: a56e1a49-cee9-4a02-87cd-e21eee1b5466
+		summarizeBy: sum
+		sourceColumn: late_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_review
+		dataType: double
+		formatString: 0.00
+		lineageTag: 50085c5f-3c96-4fa8-86c2-49bcc50218e9
+		summarizeBy: sum
+		sourceColumn: avg_review
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column gmv
+		dataType: int64
+		formatString: 0
+		lineageTag: 6532b1be-20d1-4a37-aaff-fc70977966f0
+		summarizeBy: sum
+		sourceColumn: gmv
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_sort = VALUE(LEFT(monthly_trend[month], 4)) * 100 + VALUE(RIGHT(monthly_trend[month], 2))
+		lineageTag: bb3d44f7-d475-4681-9092-fa5c6a2a8229
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition monthly_trend = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\Intel\olist_data\monthly_trend.csv"),[Delimiter=",", Columns=6, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"month", type date}, {"orders", Int64.Type}, {"late_orders", Int64.Type}, {"late_pct", type number}, {"avg_review", type number}, {"gmv", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

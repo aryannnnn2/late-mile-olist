@@ -1,0 +1,55 @@
+table delay_curve
+	lineageTag: ae9ed389-dd87-4c43-9d26-8bda6863b945
+
+	column days_late
+		dataType: int64
+		formatString: 0
+		lineageTag: 5ce6165c-a8a3-4789-a7a7-d1862f762955
+		summarizeBy: sum
+		sourceColumn: days_late
+
+		annotation SummarizationSetBy = Automatic
+
+	column orders
+		dataType: int64
+		formatString: #,0
+		lineageTag: 3109b984-5756-4724-ab49-b6f722635d5b
+		summarizeBy: sum
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_review
+		dataType: double
+		formatString: 0.0
+		lineageTag: d7c6c8e2-591a-4234-9dda-83a8e81a915e
+		summarizeBy: sum
+		sourceColumn: avg_review
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_one_star
+		dataType: double
+		formatString: 0"%"
+		lineageTag: c571263b-f9ca-4a44-a75d-41891dc6bdbb
+		summarizeBy: sum
+		sourceColumn: pct_one_star
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition delay_curve = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\Intel\olist_data\delay_curve.csv"),[Delimiter=",", Columns=4, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"days_late", Int64.Type}, {"orders", Int64.Type}, {"avg_review", type number}, {"pct_one_star", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

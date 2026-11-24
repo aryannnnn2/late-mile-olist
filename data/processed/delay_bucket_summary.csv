@@ -1,0 +1,6 @@
+delay_bucket,orders,avg_review,pct_one_star,pct_came_back,avg_order_value,avg_seller_days,avg_carrier_days
+1. Early/on-time,89936,4.29,6.6,3.3,158.64,3.0,7.9
+2. 1-2 days late,1370,3.51,18.5,2.4,159.38,5.0,17.8
+3. 3-5 days late,1400,2.47,47.2,2.4,174.3,5.6,20.2
+4. 6-10 days late,1672,1.77,66.3,2.8,183.04,6.3,24.9
+5. 11+ days late,2092,1.71,67.3,3.0,182.83,6.8,42.0

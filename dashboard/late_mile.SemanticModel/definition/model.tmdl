@@ -1,0 +1,31 @@
+model Model
+	culture: en-GB
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-IN
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["order_facts","delay_bucket_summary","monthly_trend","state_summary","delay_curve","seller_summary","state_review_gap"]
+
+annotation PBI_ProTooling = ["MCP-PBIModeling","DevMode"]
+
+ref table order_facts
+ref table DateTableTemplate_29b7f83e-120a-4346-a145-5b973e0da0b7
+ref table LocalDateTable_37c8c353-0f1f-4a98-9b7e-ae480bd8a3b3
+ref table LocalDateTable_0a6ea77d-4ca4-4ff0-9c10-33e8cd0f10ca
+ref table LocalDateTable_1452a554-41ea-4488-a43e-e2c5b54c9bad
+ref table LocalDateTable_5451f3f5-e76e-480a-bd9d-4b5f3d629490
+ref table delay_bucket_summary
+ref table monthly_trend
+ref table state_summary
+ref table delay_curve
+ref table seller_summary
+ref table state_review_gap
+ref table LocalDateTable_e72c9c97-8ebc-4d88-a648-e62915e7a1ed
+
+ref cultureInfo en-GB
+

@@ -1,0 +1,173 @@
+table state_summary
+	lineageTag: 1ad7476b-b6ec-47df-94cc-ec4282eb1a96
+
+	column customer_state
+		dataType: string
+		lineageTag: b87fe01e-17fc-4d61-b158-243962d0c362
+		dataCategory: StateOrProvince
+		summarizeBy: none
+		sourceColumn: customer_state
+
+		annotation SummarizationSetBy = Automatic
+
+	column orders
+		dataType: int64
+		formatString: #,0
+		lineageTag: 3eba3003-e40a-4a45-986e-7f8b05eec674
+		summarizeBy: none
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column late_orders
+		dataType: int64
+		formatString: #,0
+		lineageTag: 6e32346c-51a3-4b05-b610-e455774b427a
+		summarizeBy: none
+		sourceColumn: late_orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column late_pct
+		dataType: double
+		formatString: 0.0"%"
+		lineageTag: 02a54a15-5007-424a-84e2-e30f1d3a1ec6
+		summarizeBy: none
+		sourceColumn: late_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_days_late_when_late
+		dataType: double
+		formatString: 0.0
+		lineageTag: e16acc33-bd9e-4c2f-b3ce-43315b32cd0b
+		summarizeBy: none
+		sourceColumn: avg_days_late_when_late
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_review
+		dataType: double
+		formatString: 0.00
+		lineageTag: ef7f4cdc-942e-4364-a2b0-1be7872c5fa9
+		summarizeBy: none
+		sourceColumn: avg_review
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column gmv
+		dataType: int64
+		formatString: """R$ ""#,0,""K"""
+		lineageTag: 981597a1-9708-41de-9d9b-73278d37c165
+		summarizeBy: none
+		sourceColumn: gmv
+
+		annotation SummarizationSetBy = Automatic
+
+	column avg_seller_days
+		dataType: double
+		lineageTag: cd2fdeca-16ad-4601-92bc-1e7e704ea1f4
+		summarizeBy: none
+		sourceColumn: avg_seller_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_carrier_days
+		dataType: double
+		lineageTag: d5a9c3d8-f6f0-4a79-9e95-0146be50bcf2
+		summarizeBy: none
+		sourceColumn: avg_carrier_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_promised_days
+		dataType: double
+		lineageTag: 2965eac9-1a6a-4509-aa9d-dfe0885d0198
+		summarizeBy: none
+		sourceColumn: avg_promised_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_actual_days
+		dataType: double
+		lineageTag: fada7b45-c545-436a-bb62-1f870162a311
+		summarizeBy: none
+		sourceColumn: avg_actual_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_cushion_days
+		dataType: double
+		lineageTag: 9aea3943-7b25-4424-9bc9-f5af22002e35
+		summarizeBy: none
+		sourceColumn: avg_cushion_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column enough_orders
+		dataType: int64
+		formatString: 0
+		lineageTag: b503d7cb-9883-4eed-9b11-c8c8f46f766b
+		summarizeBy: none
+		sourceColumn: enough_orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column gmv_k = state_summary[gmv] / 1000
+		dataType: double
+		formatString: """R$ ""#,0""K"""
+		lineageTag: 5d0c6a3e-7a41-4c1b-9d52-3f6e1b7a9c21
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column focus_state = IF(state_summary[customer_state] IN {"AL", "MA", "RJ", "SP", "MG"}, state_summary[customer_state], "Other states")
+		dataType: string
+		lineageTag: 22498fdf-e0da-4a51-a4ee-683f2bc96ff7
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column late_group = SWITCH(TRUE(), state_summary[customer_state] IN {"AL", "MA", "SE", "PI", "CE", "BA"}, "Northeast hotspots", state_summary[customer_state] = "RJ", "Rio de Janeiro", "Other states")
+		dataType: string
+		lineageTag: c82f6354-5b57-46c6-96ed-9d796a193540
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column late_rank = RANKX(FILTER(ALL(state_summary), state_summary[enough_orders] = 1), state_summary[late_pct], , DESC, Dense)
+		dataType: int64
+		formatString: 0
+		lineageTag: 49085f14-9460-4145-a1e8-1d17b51ceed2
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition state_summary = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\Intel\olist_data\state_summary.csv"),[Delimiter=",", Columns=13, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"customer_state", type text}, {"orders", Int64.Type}, {"late_orders", Int64.Type}, {"late_pct", type number}, {"avg_days_late_when_late", type number}, {"avg_review", type number}, {"gmv", Int64.Type}, {"avg_seller_days", type number}, {"avg_carrier_days", type number}, {"avg_promised_days", type number}, {"avg_actual_days", type number}, {"avg_cushion_days", type number}, {"enough_orders", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

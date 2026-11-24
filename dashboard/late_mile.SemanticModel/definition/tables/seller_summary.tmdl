@@ -1,0 +1,129 @@
+table seller_summary
+	lineageTag: 5cf20852-229f-4588-90e4-b0b521de1841
+
+	column seller_id
+		dataType: string
+		lineageTag: dc1045c1-5fec-46b8-9673-1013529c5414
+		summarizeBy: none
+		sourceColumn: seller_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_short
+		dataType: string
+		lineageTag: 2443e168-d9bc-4be3-a4bb-9d5da350ecd1
+		summarizeBy: none
+		sourceColumn: seller_short
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_state
+		dataType: string
+		lineageTag: 93d84347-a56f-4b22-b1eb-96b448dbdab3
+		summarizeBy: none
+		sourceColumn: seller_state
+
+		annotation SummarizationSetBy = Automatic
+
+	column orders
+		dataType: int64
+		formatString: #,0
+		lineageTag: 56daa0df-3e0c-4cd0-a16f-4d368f6358a0
+		summarizeBy: sum
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column late_orders
+		dataType: int64
+		formatString: #,0
+		lineageTag: faa827df-9726-40e3-9f4f-37c31ffd3cc2
+		summarizeBy: sum
+		sourceColumn: late_orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column late_pct
+		dataType: double
+		formatString: 0.0"%"
+		lineageTag: 09cd581c-0582-4ab9-9509-ff281dec05ec
+		summarizeBy: sum
+		sourceColumn: late_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column expected_late_orders
+		dataType: double
+		formatString: 0.0
+		lineageTag: ad3296a4-2e89-47f8-93df-336b1d73acbd
+		summarizeBy: sum
+		sourceColumn: expected_late_orders
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column excess_late_orders
+		dataType: double
+		formatString: 0.0
+		lineageTag: ca593863-9727-44dc-8e18-681baca21a9e
+		summarizeBy: sum
+		sourceColumn: excess_late_orders
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_seller_days
+		dataType: double
+		formatString: 0.0
+		lineageTag: f2633e8c-3d5d-48df-8469-bd4af63c0953
+		summarizeBy: sum
+		sourceColumn: avg_seller_days
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_review
+		dataType: double
+		formatString: 0.00
+		lineageTag: 35f0408d-eb2d-46ab-8537-7fa2552b2ae9
+		summarizeBy: sum
+		sourceColumn: avg_review
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column gmv
+		dataType: int64
+		formatString: #,0
+		lineageTag: 210bfa46-fffc-4086-bb6b-f995b28b13db
+		summarizeBy: sum
+		sourceColumn: gmv
+
+		annotation SummarizationSetBy = Automatic
+
+	column excess_rank = RANKX(ALL(seller_summary), seller_summary[excess_late_orders], , DESC, Dense)
+		dataType: int64
+		formatString: 0
+		lineageTag: 15561bb2-0862-4484-a0e1-4f8cc957b2c7
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition seller_summary = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\Intel\olist_data\seller_summary.csv"),[Delimiter=",", Columns=11, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"seller_id", type text}, {"seller_short", type text}, {"seller_state", type text}, {"orders", Int64.Type}, {"late_orders", Int64.Type}, {"late_pct", type number}, {"expected_late_orders", type number}, {"excess_late_orders", type number}, {"avg_seller_days", type number}, {"avg_review", type number}, {"gmv", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

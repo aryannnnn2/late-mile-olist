@@ -1,0 +1,398 @@
+table order_facts
+	lineageTag: e6aedb1e-de6b-4f3f-8d4a-85e244892c7a
+
+	measure Orders = COUNTROWS(order_facts)
+		formatString: 0
+		lineageTag: 0d05a6c2-f01f-489d-be16-87e83814ad8b
+
+		annotation PBI_FormatHint = {"isDecimal":true}
+
+	measure 'Late %' = AVERAGE(order_facts[is_late])
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 8c305b99-261c-4c06-96e6-dbdec9bd0c38
+
+	measure 'On-time %' = 1 - [Late %]
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 144ff953-3cc9-4632-8d48-e75e110cd592
+
+	measure 'Avg Review' = AVERAGE(order_facts[review_score])
+		formatString: 0.00
+		lineageTag: 9e4b4e15-9320-4177-885a-8a91bc2295fb
+
+	/// Total item value in Brazilian reais (excludes freight).
+	measure GMV = SUM(order_facts[item_value])
+		formatString: """R$ ""#,0"
+		lineageTag: 2a867412-5cc8-45ce-b60f-78c0d561d548
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Repeat %' = AVERAGE(order_facts[came_back])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: bd8a1ed6-7a77-4b36-bc83-24938000f7ae
+
+	/// Number of orders delivered after the estimated date.
+	measure 'Late Orders' = SUM(order_facts[is_late])
+		formatString: #,0
+		displayFolder: 1 Core
+		lineageTag: d7f10efc-ce76-421e-a31b-cfb71f6a3fbd
+
+	/// Share of orders with a 1-star review.
+	measure '1-Star %' = AVERAGE(order_facts[is_one_star])
+		formatString: 0.0%
+		displayFolder: 1 Core
+		lineageTag: 99d3058f-0cb6-4db2-8d4c-2ec89c6454ae
+
+	/// Item value in millions of Brazilian reais.
+	measure 'GMV (R$ M)' = DIVIDE([GMV], 1000000)
+		formatString: """R$ ""0.00""M"""
+		displayFolder: 1 Core
+		lineageTag: a7e3abf6-835b-47b1-a863-26bb6b44f56c
+
+	/// Average review score for on-time orders.
+	measure 'Avg Review On-time' = CALCULATE([Avg Review], order_facts[is_late] = 0)
+		formatString: 0.00
+		displayFolder: 2 Customer impact
+		lineageTag: 02eaccae-bbe4-4334-9625-615ae622e95d
+
+	/// Average review score for late orders.
+	measure 'Avg Review Late' = CALCULATE([Avg Review], order_facts[is_late] = 1)
+		formatString: 0.00
+		displayFolder: 2 Customer impact
+		lineageTag: a207bb69-7928-4d76-be60-b4c296b47341
+
+	/// Review points lost when an order is late.
+	measure 'Review Penalty' = [Avg Review On-time] - [Avg Review Late]
+		formatString: 0.00
+		displayFolder: 2 Customer impact
+		lineageTag: c9443de2-3f59-41c7-949c-91315c831427
+
+	measure '1-Star % On-time' = CALCULATE([1-Star %], order_facts[is_late] = 0)
+		formatString: 0.0%
+		displayFolder: 2 Customer impact
+		lineageTag: cd4ac293-28f1-4754-b3bb-67b23d29eed4
+
+	measure '1-Star % Late' = CALCULATE([1-Star %], order_facts[is_late] = 1)
+		formatString: 0.0%
+		displayFolder: 2 Customer impact
+		lineageTag: d64ec387-6aeb-470d-90e4-8e4512845278
+
+	measure '1-Star % 3+ Days Late' = CALCULATE([1-Star %], order_facts[delay_days] >= 3)
+		formatString: 0.0%
+		displayFolder: 2 Customer impact
+		lineageTag: 89b7d7ba-5f7b-4837-aa73-8b36aa2f7d4b
+
+	/// How many times more often late orders get a 1-star review.
+	measure '1-Star Multiple (Late vs On-time)' = DIVIDE([1-Star % Late], [1-Star % On-time])
+		formatString: 0.0"x"
+		displayFolder: 2 Customer impact
+		lineageTag: e6dd3e89-a2e5-4312-be91-94d39bbc53a4
+
+	measure 'Repeat % Late' = CALCULATE([Repeat %], order_facts[is_late] = 1)
+		formatString: 0.00%
+		displayFolder: 2 Customer impact
+		lineageTag: 091d1b2c-77c9-4f98-89ef-889752595c79
+
+	measure 'Repeat % On-time' = CALCULATE([Repeat %], order_facts[is_late] = 0)
+		formatString: 0.00%
+		displayFolder: 2 Customer impact
+		lineageTag: 0a9328cb-d7c6-4a6c-80a5-aafa8827d9f9
+
+	measure 'Avg Carrier Days Late' = CALCULATE(AVERAGE(order_facts[carrier_days]), order_facts[is_late] = 1)
+		formatString: 0.0
+		displayFolder: 3 Delivery stages
+		lineageTag: c856d5b4-3683-48b9-b26c-1c0f51b3ea52
+
+	measure 'Avg Carrier Days On-time' = CALCULATE(AVERAGE(order_facts[carrier_days]), order_facts[is_late] = 0)
+		formatString: 0.0
+		displayFolder: 3 Delivery stages
+		lineageTag: d55d4986-abf7-40f7-8f12-c583dcdbe147
+
+	measure 'Avg Seller Days Late' = CALCULATE(AVERAGE(order_facts[seller_days]), order_facts[is_late] = 1)
+		formatString: 0.0
+		displayFolder: 3 Delivery stages
+		lineageTag: a0cbbdfd-4687-4322-8ffe-92042da7a8b4
+
+	measure 'Avg Seller Days On-time' = CALCULATE(AVERAGE(order_facts[seller_days]), order_facts[is_late] = 0)
+		formatString: 0.0
+		displayFolder: 3 Delivery stages
+		lineageTag: df72bd93-c16a-4bfe-83c4-11e18085c4d7
+
+	measure 'Extra Carrier Days' = [Avg Carrier Days Late] - [Avg Carrier Days On-time]
+		formatString: 0.0
+		displayFolder: 3 Delivery stages
+		lineageTag: 46a8bd87-801f-4cd3-87ac-65344beda8b7
+
+	measure 'Extra Seller Days' = [Avg Seller Days Late] - [Avg Seller Days On-time]
+		formatString: 0.0
+		displayFolder: 3 Delivery stages
+		lineageTag: dc113e54-dec1-4972-8fb1-5f6b53c4e8f4
+
+	/// Share of the extra transit time (late vs on-time orders) that happens at the carrier stage.
+	measure 'Carrier Share of Extra Delay' = DIVIDE([Extra Carrier Days], [Extra Carrier Days] + [Extra Seller Days])
+		formatString: 0%
+		displayFolder: 3 Delivery stages
+		lineageTag: 51249946-09fb-401d-a577-406c0c83c7f0
+
+	/// Late rate minus the national late rate.
+	measure 'Late % vs National' = [Late %] - CALCULATE([Late %], ALL(order_facts[customer_state]))
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: 4 Alerts
+		lineageTag: 55cebb94-c77a-4737-90c9-07d9f3d8fa42
+
+	/// Alert when the late rate is above 10%.
+	measure 'Late % Alert' = IF([Late %] > 0.10, "Alert", "OK")
+		displayFolder: 4 Alerts
+		lineageTag: fc48bc14-b3b8-45a2-b73e-cc27a97dbc73
+
+	/// Hex colour for conditional formatting: red above 10% late, blue otherwise.
+	measure 'Late % Colour' = IF([Late %] > 0.10, "#E4572E", "#1F4E79")
+		displayFolder: 4 Alerts
+		lineageTag: 1d17ff63-0c39-401b-8a72-97c08c63709e
+
+	column order_id
+		dataType: string
+		lineageTag: e46e62e2-b002-43e2-afca-8c06a511e590
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_unique_id
+		dataType: string
+		lineageTag: 5d4b8090-286b-4b84-8a86-31ddf873a97c
+		summarizeBy: none
+		sourceColumn: customer_unique_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_state
+		dataType: string
+		lineageTag: 07384b93-726b-4a8f-a517-22d87453d2de
+		summarizeBy: none
+		sourceColumn: customer_state
+
+		annotation SummarizationSetBy = Automatic
+
+	column purchase_ts
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 3ca90941-65ea-46c8-86fc-0ca5ff7f12d8
+		summarizeBy: none
+		sourceColumn: purchase_ts
+
+		variation Variation
+			isDefault
+			relationship: 0cecac5d-8f8c-4f19-9201-893711458d47
+			defaultHierarchy: LocalDateTable_37c8c353-0f1f-4a98-9b7e-ae480bd8a3b3.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column carrier_ts
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 3b8507a8-3f78-4a7f-8c6f-1fb8747d88df
+		summarizeBy: none
+		sourceColumn: carrier_ts
+
+		variation Variation
+			isDefault
+			relationship: a7f3a2b6-13b8-4226-93b9-7a5853abdaed
+			defaultHierarchy: LocalDateTable_0a6ea77d-4ca4-4ff0-9c10-33e8cd0f10ca.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column delivered_ts
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 2d1afe07-eac0-47ea-a408-0c40a81a09f2
+		summarizeBy: none
+		sourceColumn: delivered_ts
+
+		variation Variation
+			isDefault
+			relationship: 71e95e3f-0741-4693-a0b3-f8eddd032384
+			defaultHierarchy: LocalDateTable_1452a554-41ea-4488-a43e-e2c5b54c9bad.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column estimated_ts
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 9c73a3b4-a693-4e8c-b42c-7a2f845d8ac5
+		summarizeBy: none
+		sourceColumn: estimated_ts
+
+		variation Variation
+			isDefault
+			relationship: e4e34e4d-d086-48cd-82f9-a1d1471306a9
+			defaultHierarchy: LocalDateTable_5451f3f5-e76e-480a-bd9d-4b5f3d629490.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column delay_days
+		dataType: int64
+		formatString: 0
+		lineageTag: eb8b00ec-0662-4da5-9bf0-7f046634eac7
+		summarizeBy: sum
+		sourceColumn: delay_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column seller_days
+		dataType: int64
+		formatString: 0
+		lineageTag: c85eac92-8726-4823-9707-bc4b7e0963df
+		summarizeBy: sum
+		sourceColumn: seller_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column carrier_days
+		dataType: int64
+		formatString: 0
+		lineageTag: f8281d56-56ee-4b92-ba4c-4ad407bc4058
+		summarizeBy: sum
+		sourceColumn: carrier_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column promised_days
+		dataType: int64
+		formatString: 0
+		lineageTag: 88c82120-5d7d-4065-8a3b-0627ebdae77d
+		summarizeBy: sum
+		sourceColumn: promised_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_days
+		dataType: int64
+		formatString: 0
+		lineageTag: bea55179-c3ec-42f7-ab8c-9155e214500f
+		summarizeBy: sum
+		sourceColumn: total_days
+
+		annotation SummarizationSetBy = Automatic
+
+	column item_value
+		dataType: double
+		lineageTag: 1dbff586-ca97-4b87-b2ab-12083d454a5d
+		summarizeBy: sum
+		sourceColumn: item_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column freight_value
+		dataType: double
+		lineageTag: 6a141c61-bf1e-4434-9497-ca875baeb6f7
+		summarizeBy: sum
+		sourceColumn: freight_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column order_value
+		dataType: double
+		lineageTag: 70fb2915-1033-493c-b067-ac9296e6c0fa
+		summarizeBy: sum
+		sourceColumn: order_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column n_items
+		dataType: int64
+		formatString: 0
+		lineageTag: b2268d40-e3df-4960-b205-acffe151d2d9
+		summarizeBy: sum
+		sourceColumn: n_items
+
+		annotation SummarizationSetBy = Automatic
+
+	column n_sellers
+		dataType: int64
+		formatString: 0
+		lineageTag: d22fd987-0576-432c-a2e2-9a7696893555
+		summarizeBy: sum
+		sourceColumn: n_sellers
+
+		annotation SummarizationSetBy = Automatic
+
+	column review_score
+		dataType: int64
+		formatString: 0
+		lineageTag: 1f390a80-6a5c-48fb-97a6-527f9d0cb399
+		summarizeBy: sum
+		sourceColumn: review_score
+
+		annotation SummarizationSetBy = Automatic
+
+	column delay_bucket
+		dataType: string
+		lineageTag: bfedb391-6c9e-41cd-a5d0-19b37fa40254
+		summarizeBy: none
+		sourceColumn: delay_bucket
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_late
+		dataType: int64
+		formatString: 0
+		lineageTag: 61a3fd33-4499-4c45-8727-93d93c5f276f
+		summarizeBy: sum
+		sourceColumn: is_late
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_one_star
+		dataType: int64
+		formatString: 0
+		lineageTag: 1ab4e2dc-51d4-4de3-a8e9-c162e8dd129e
+		summarizeBy: sum
+		sourceColumn: is_one_star
+
+		annotation SummarizationSetBy = Automatic
+
+	column came_back
+		dataType: int64
+		formatString: 0
+		lineageTag: 521bd025-c792-4979-bb35-614f21d04512
+		summarizeBy: sum
+		sourceColumn: came_back
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Item sales value of late orders. Not lost revenue.
+	measure 'GMV Late (R$ M)' = CALCULATE([GMV (R$ M)], order_facts[is_late] = 1)
+		formatString: """R$ ""0.00""M"""
+		displayFolder: 3 Impact
+		lineageTag: 8c47997d-4127-4ae8-b312-1b62a8f51a0b
+
+	/// Item sales value of orders with a 1-star review. Not lost revenue.
+	measure 'GMV 1-Star (R$ M)' = CALCULATE([GMV (R$ M)], order_facts[is_one_star] = 1)
+		formatString: """R$ ""0.00""M"""
+		displayFolder: 3 Impact
+		lineageTag: 9397e053-ba6d-4b5b-8211-9d74c36c083d
+
+	/// Share of all late orders explained by the worst N sellers (excess over expected).
+	measure 'Cumulative Excess Share' = VAR r = MAX(seller_summary[excess_rank]) RETURN DIVIDE(CALCULATE(SUM(seller_summary[excess_late_orders]), FILTER(ALL(seller_summary), seller_summary[excess_rank] <= r)), [Late Orders])
+		formatString: 0.0%
+		displayFolder: 3 Impact
+		lineageTag: 362ad334-412b-4851-a458-1caa5942ad01
+
+	partition order_facts = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\Intel\olist_data\order_facts.csv"),[Delimiter=",", Columns=22, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"order_id", type text}, {"customer_unique_id", type text}, {"customer_state", type text}, {"purchase_ts", type datetime}, {"carrier_ts", type datetime}, {"delivered_ts", type datetime}, {"estimated_ts", type datetime}, {"delay_days", Int64.Type}, {"seller_days", Int64.Type}, {"carrier_days", Int64.Type}, {"promised_days", Int64.Type}, {"total_days", Int64.Type}, {"item_value", type number}, {"freight_value", type number}, {"order_value", type number}, {"n_items", Int64.Type}, {"n_sellers", Int64.Type}, {"review_score", Int64.Type}, {"delay_bucket", type text}, {"is_late", Int64.Type}, {"is_one_star", Int64.Type}, {"came_back", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

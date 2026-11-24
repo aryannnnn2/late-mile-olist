@@ -1,0 +1,74 @@
+table state_review_gap
+	lineageTag: a2b64c9d-1051-4baf-9405-0c9ef982ab70
+
+	column customer_state
+		dataType: string
+		lineageTag: 7f0c9384-d39f-47b6-a50f-646a1daa825c
+		summarizeBy: none
+		sourceColumn: customer_state
+
+		annotation SummarizationSetBy = Automatic
+
+	column orders
+		dataType: int64
+		formatString: #,0
+		lineageTag: e2aacede-034e-4a27-938d-754dc81b4567
+		summarizeBy: sum
+		sourceColumn: orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column late_orders
+		dataType: int64
+		formatString: 0
+		lineageTag: 891204ad-596c-4d53-8a16-b24881953b0f
+		summarizeBy: sum
+		sourceColumn: late_orders
+
+		annotation SummarizationSetBy = Automatic
+
+	column review_on_time
+		dataType: double
+		formatString: 0.0
+		lineageTag: 79d63cc1-2876-451d-9679-0ccb02d4bb64
+		summarizeBy: sum
+		sourceColumn: review_on_time
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column review_late
+		dataType: double
+		formatString: 0.0
+		lineageTag: 32715f50-e49a-4c32-bd57-74603da3b9b0
+		summarizeBy: sum
+		sourceColumn: review_late
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column review_gap
+		dataType: double
+		formatString: 0.00
+		lineageTag: 16060092-308c-42ce-badd-54f2d6851c3d
+		summarizeBy: sum
+		sourceColumn: review_gap
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition state_review_gap = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\Intel\olist_data\state_review_gap.csv"),[Delimiter=",", Columns=6, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"customer_state", type text}, {"orders", Int64.Type}, {"late_orders", Int64.Type}, {"review_on_time", type number}, {"review_late", type number}, {"review_gap", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
